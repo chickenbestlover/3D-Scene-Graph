@@ -130,8 +130,12 @@ for idx in range(imgLoader.num_frames)[args.frame_start:args.frame_end]:
     print(winname_scene)
     image_original = image_scene.copy()
     if args.visualize:
-        cv2.namedWindow('detection')  # Create a named window
-        cv2.moveWindow('detection', 10, 10)
+        if args.blend:
+            depth = cv2.cvtColor(np.array(depth_img,dtype=np.uint8),cv2.COLOR_GRAY2BGR)
+            image_original = cv2.addWeighted(src1=image_original,alpha=0.9,src2=depth,beta=0.1,gamma=0)
+
+        cv2.namedWindow('Initial Detection',cv2.WINDOW_GUI_NORMAL)  # Create a named window
+        cv2.moveWindow('Initial Detection', 1275, 10)
         cv2.putText(image_original,
                     winname_scene,
                     (1, 11),
@@ -140,7 +144,11 @@ for idx in range(imgLoader.num_frames)[args.frame_start:args.frame_end]:
                     # (150, 150, 150),
                     (30, 30, 200),
                     2)
-        cv2.imshow('detection', image_original)
+        cv2.resizeWindow('Initial Detection', 640, 480)
+        cv2.imshow('Initial Detection', image_original)
+        cv2.namedWindow('Object ID Assigned',cv2.WINDOW_GUI_NORMAL)  # Create a named window
+        cv2.moveWindow('Object ID Assigned', 1275, 536)
+        cv2.resizeWindow('Object ID Assigned', 640, 480)
         cv2.waitKey(1)
     if not IS_KEY_OR_ANCHOR:
         continue
@@ -164,8 +172,11 @@ for idx in range(imgLoader.num_frames)[args.frame_start:args.frame_end]:
     img_obj_detected = vis_tuning.vis_object_detection(image_scene.copy(), test_set, obj_cls[:, 0], obj_boxes, obj_scores[:, 0])
 
     if args.visualize:
-        cv2.namedWindow('detection')  # Create a named window
-        cv2.moveWindow('detection', 10, 10)
+        if args.blend:
+            depth = cv2.cvtColor(np.array(depth_img,dtype=np.uint8),cv2.COLOR_GRAY2BGR)
+            img_obj_detected = cv2.addWeighted(src1=img_obj_detected,alpha=0.9,src2=depth,beta=0.1,gamma=0)
+        cv2.namedWindow('Initial Detection',cv2.WINDOW_GUI_NORMAL)  # Create a named window
+        cv2.moveWindow('Initial Detection', 1275, 10)
         cv2.putText(img_obj_detected,
                     winname_scene,
                     (1, 11),
@@ -173,7 +184,8 @@ for idx in range(imgLoader.num_frames)[args.frame_start:args.frame_end]:
                     0.5,
                     (30, 200, 30),
                     2)
-        cv2.imshow('detection', img_obj_detected)
+        cv2.resizeWindow('Initial Detection', 640, 480)
+        cv2.imshow('Initial Detection', img_obj_detected)
     scene_name = args.scannet_path.split('/')[-1]
     try: os.makedirs(osp.join(args.vis_result_path, scene_name,'original'))
     except: pass
@@ -189,8 +201,8 @@ for idx in range(imgLoader.num_frames)[args.frame_start:args.frame_end]:
                                                       subject_IDs, object_IDs, triplet_scores,relationships,
                                                       pix_depth, inv_p_matrix, inv_R, Trans, dataset=args.dataset)
     if args.visualize:
-        cv2.namedWindow('updated')  # Create a named window
-        cv2.moveWindow('updated', 700, 10)
+        cv2.namedWindow('Object ID Assigned',cv2.WINDOW_GUI_NORMAL)  # Create a named window
+        cv2.moveWindow('Object ID Assigned', 1275, 536)
         cv2.putText(updated_image_scene,
                     winname_scene,
                     (1, 11),
@@ -198,7 +210,8 @@ for idx in range(imgLoader.num_frames)[args.frame_start:args.frame_end]:
                     0.5,
                     (30, 200, 30),
                     2)
-        cv2.imshow('updated', updated_image_scene)
+        cv2.resizeWindow('Object ID Assigned', 640, 480)
+        cv2.imshow('Object ID Assigned', updated_image_scene)
     try: os.makedirs(osp.join(args.vis_result_path, scene_name,'updated'))
     except: pass
     cv2.imwrite(osp.join(args.vis_result_path, scene_name,'updated','updated'+str(idx) +'.jpg'), updated_image_scene)

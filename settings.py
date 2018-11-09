@@ -83,6 +83,8 @@ def parse_args():
                         help='enable visualization')
     parser.add_argument('--format', type=str, default='png',
                         help='scene graph image format, pdf or png')
+    parser.add_argument('--blend', action='store_true',
+                        help='rgb images and depth images are blended if true')
     args = parser.parse_args()
 
     return args
